@@ -1,0 +1,234 @@
+---
+title: "Week12_IP"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### 1. Research Question
+
+
+### 2. Metric of Success
+
+Identify which individuals are likely to click her ads.
+
+### 3. Understanding the Context
+A Kenyan entrepreneur has created an online cryptography course and would want to advertise it on her blog. She currently targets audiences originating from various countries. In the past, she ran ads to advertise a related course on the same blog and collected data in the process. She would now like to employ your services as a Data Science Consultant to help her identify which individuals are most likely to click on her ads. 
+
+### 4. Recording the Experimental Design
+a. Loading the Dataset
+b. Data Cleaning 
+c. Exploratory Data Analysis
+d. Recommendations and Conclusions
+
+### 5. Data Relevance
+This dataset is relevant as  it contains details about the visitors on the blog
+
+
+#### Loading the Libraries
+
+```{r}
+install.packages('data.table')
+install.packages('tidyverse')
+```
+library(data.table)
+library(tidyverse)
+
+```{r}
+crypto_ads <- read.csv('http://bit.ly/IPAdvertisingData')
+crypto_ads
+```
+# Check the Data
+```{r}
+head(crypto_ads)
+```
+
+
+```{r}
+tail(crypto_ads)
+```
+
+```{r}
+colnames(crypto_ads)
+```
+
+
+```{r}
+ncol(crypto_ads)
+```
+
+
+```{r}
+nrow(crypto_ads)
+```
+
+```{r}
+str(crypto_ads)
+```
+
+
+```{r}
+summary(crypto_ads)
+```
+#### Checking the Data Types
+```{r}
+str(crypto_ads)
+```
+
+##### Checking for Null Values
+```{r}
+total_null <- sum(is.na(crypto_ads))
+total_null
+``` 
+
+
+
+# Data Cleaning
+## Duplicate 
+```{r}
+duplicated_rows <- crypto_ads[duplicated(crypto_ads),]
+nrow(duplicated_rows)
+```
+
+```{r}
+duplicated_rows <- crypto_ads[duplicated(crypto_ads),]
+nrow(duplicated_rows)
+crypto_ads <- crypto_ads[!duplicated(crypto_ads), ]
+duplicated_rows <- crypto_ads[duplicated(crypto_ads),]
+nrow(duplicated_rows)
+```
+
+## Missing Values
+```{r}
+colSums(is.na(crypto_ads))
+```
+
+There are no missing values in the dataset. 
+
+```{r}
+data <- na.omit(crypto_ads)
+colSums(is.na(crypto_ads))
+```
+#### Screening for Outliers
+An outlier is an observation that is numerically distant from the rest of the data. When reviewing a boxplot, an outlier is defined as a data point that is located outside the fences (“whiskers”) of the boxplot.
+
+
+```{r}
+colnames(crypto_ads)
+```
+
+
+```{r}
+#boxplot(, main = )
+```
+### Outliers in the column Area.Income
+```{r}
+a <- crypto_ads$Area.Income
+boxplot.stats(a)$out
+```
+
+There are outliers in the Area Income
+
+
+# Exploratory Data Analysis  
+## Univariate Analysis
+
+#Age Distribution.
+```{r}
+hist(crypto_ads$Age, breaks=12, col="red",xlab="Ages of Visitors", main='Age Distribution of Visitors')
+```
+
+Majority of the visitors to the website range between 25 and 40 years of age
+
+
+# Distribution of Daily Internet Usage
+```{r}
+daily.usage1 <- hist(crypto_ads$Daily.Internet.Usage, xlab="Daily Internet Usage")
+plot(daily.usage1)
+```
+Visitors to the website spend between 100 and 240 minutes online.
+
+#Distribution of Area Income
+```{r}
+Area.Income1 <- density(crypto_ads$Area.Income, xlab="Area Income of the Visitors")
+plot(Area.Income1)
+```
+Most of the visitors to the site have an average income of 60,000
+
+
+
+
+## Bivariate Analysis
+
+##Covariance between Daily Internet Usage and Area Income
+```{r}
+Daily.Internet.Usage <- crypto_ads$Daily.Internet.Usage 
+Area.Income <- crypto_ads$Area.Income 
+cov(Daily.Internet.Usage, Area.Income)
+```
+##Covariance between Daily Internet Usage and Age on the Site
+```{r}
+Daily.Internet.Usage <- crypto_ads$Daily.Internet.Usage
+Ages <- crypto_ads$Age
+cov(Daily.Internet.Usage, Ages)
+```
+
+##Covariance between age and area income on site 
+```{r}
+Area_Income <- crypto_ads$Area.Income 
+age <- crypto_ads$Age
+cov(Area.Income, age)
+```
+##Covariance between Daily Internet Usage and Area income
+```{r}
+Daily_Internet_Usage <- crypto_ads$Daily.Internet.Usage
+Area.Income <- crypto_ads$Area.Income 
+cov(Daily.Internet.Usage, Area.Income)
+```
+
+
+```{r}
+```
+# Daily Time spent on site and Age.
+```{r}
+library(ggplot2)
+# Barplot
+p<-ggplot(data=crypto_ads, aes(x=Age, y=Daily.Time.Spent.on.Site)) +
+  geom_bar(stat="identity")
+p + coord_flip()
+```
+
+
+```{r}
+colnames(crypto_ads)
+```
+
+
+
+###Daily time spent on site 
+
+```{r}
+library(ggplot2)
+# Barplot
+p<-ggplot(data=crypto_ads, aes(x=Clicked.on.Ad, y=Daily.Time.Spent.on.Site)) +
+  geom_bar(stat="identity")
+p + coord_flip()
+```
+
+Users are online but no advertisments clicked
+
+
+
+
+# Implement the Solution
+# Analysis
+1. Users are online but no advertisments clicked
+2. Most of the visitors to the site have an average income of 60,000
+3. Majority of the visitors to the website range between 25 and 40 years of age
+
+# Challenge the Solution
+
+
+# Follow up Questions

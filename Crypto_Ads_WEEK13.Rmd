@@ -1,0 +1,453 @@
+---
+title: "Week12_IP"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### 1. Research Question
+Tp predict individuals who are most likely to click on a cryptography course advertisement
+
+### 2. Metric of Success
+
+Identify which individuals are likely to click her ads.
+
+### 3. Understanding the Context
+A Kenyan entrepreneur has created an online cryptography course and would want to advertise it on her blog. She currently targets audiences originating from various countries. In the past, she ran ads to advertise a related course on the same blog and collected data in the process. She would now like to employ your services as a Data Science Consultant to help her identify which individuals are most likely to click on her ads. 
+
+### 4. Recording the Experimental Design
+a. Loading the Dataset
+b. Data Cleaning 
+c. Exploratory Data Analysis
+d. Recommendations and Conclusions
+
+### 5. Data Relevance
+This dataset is relevant as  it contains details about the visitors on the blog
+
+
+#### Loading the Libraries
+
+```{r}
+install.packages('data.table')
+install.packages('tidyverse')
+```
+```{r}
+library(data.table)
+library(tidyverse)
+```
+
+
+```{r}
+crypto_ads <- read.csv('http://bit.ly/IPAdvertisingData')
+crypto_ads
+```
+# Check the Data
+```{r}
+head(crypto_ads)
+```
+
+
+```{r}
+tail(crypto_ads)
+```
+
+```{r}
+colnames(crypto_ads)
+```
+
+
+```{r}
+ncol(crypto_ads)
+```
+
+
+```{r}
+nrow(crypto_ads)
+```
+
+```{r}
+str(crypto_ads)
+```
+
+
+```{r}
+summary(crypto_ads)
+```
+#### Checking the Data Types
+```{r}
+str(crypto_ads)
+```
+
+```{r}
+# Checking the number of unique values in each column
+
+lengths(lapply(crypto_ads, unique))
+```
+
+
+
+# Data Cleaning
+## Checking for Null Values
+```{r}
+total_null <- sum(is.na(crypto_ads))
+total_null
+``` 
+
+
+
+## Duplicate 
+```{r}
+duplicated_rows <- crypto_ads[duplicated(crypto_ads),]
+nrow(duplicated_rows)
+```
+
+```{r}
+duplicated_rows <- crypto_ads[duplicated(crypto_ads),]
+nrow(duplicated_rows)
+crypto_ads <- crypto_ads[!duplicated(crypto_ads), ]
+duplicated_rows <- crypto_ads[duplicated(crypto_ads),]
+nrow(duplicated_rows)
+```
+
+## Missing Values
+```{r}
+colSums(is.na(crypto_ads))
+```
+
+There are no missing values in the dataset. 
+
+```{r}
+data <- na.omit(crypto_ads)
+colSums(is.na(crypto_ads))
+```
+#### Screening for Outliers
+An outlier is an observation that is numerically distant from the rest of the data. When reviewing a boxplot, an outlier is defined as a data point that is located outside the fences (“whiskers”) of the boxplot.
+
+
+```{r}
+colnames(crypto_ads)
+```
+
+
+```{r}
+#boxplot(, main = )
+```
+### Outliers in the column Area.Income
+```{r}
+a <- crypto_ads$Area.Income
+boxplot.stats(a)$out
+```
+
+There are outliers in the Area Income
+
+
+# creating a variable with only numeric columns
+
+```{r}
+library(tidyverse)
+crypto_numeric <- crypto_ads %>% select(1,2,3,4,7,10)
+```
+
+
+# Previewing outliers for numeric columns using boxplots
+
+```{r}
+boxplot(crypto_numeric)
+```
+# Boxplot for age variable
+
+```{r}
+boxplot(crypto_numeric$Age)
+```
+# Boxplot for daily time spent variable
+
+```{r}
+boxplot(crypto_numeric$Daily.Time.Spent.on.Site)
+```
+
+
+
+# Exploratory Data Analysis  
+## Univariate Analysis
+
+# Calculating the mean 
+
+```{r}
+lapply(crypto_numeric,FUN=mean)
+```
+OBSERVATION:
+
+
+# Calculating the median 
+```{r}
+lapply(crypto_numeric,FUN=median)
+```
+OBSERVATION: 
+
+# Calculating the mode 
+
+```{r}
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+lapply(crypto_numeric,FUN=getmode)
+```
+# Calculating the quantiles 
+
+```{r}
+lapply(crypto_numeric,FUN=quantile)
+```
+
+
+
+# Calculating the range 
+
+```{r}
+lapply(crypto_numeric,FUN=range)
+```
+
+
+
+# Calculating the variance 
+
+```{r}
+lapply(crypto_numeric,FUN=var)
+```
+
+
+
+
+# Calculating the standard deviation 
+```{r}
+lapply(crypto_numeric,FUN=sd)
+```
+
+
+
+#Age Distribution.
+```{r}
+hist(crypto_ads$Age, breaks=12, col="red",xlab="Ages of Visitors", main='Age Distribution of Visitors')
+```
+
+Majority of the visitors to the website range between 25 and 40 years of age
+
+
+# Distribution of Daily Internet Usage
+```{r}
+daily.usage1 <- hist(crypto_ads$Daily.Internet.Usage, xlab="Daily Internet Usage")
+plot(daily.usage1)
+```
+Visitors to the website spend between 100 and 240 minutes online.
+
+#Distribution of Area Income
+```{r}
+Area.Income1 <- density(crypto_ads$Area.Income, xlab="Area Income of the Visitors")
+plot(Area.Income1)
+```
+Most of the visitors to the site have an average income of 60,000 and is noted to be skewed towards the left.
+
+
+
+
+## Bivariate Analysis
+
+```{r}
+# Checking the correlation coefficients for numeric variables
+
+install.packages("ggcorrplot")
+library(ggcorrplot)
+corr = round(cor(select_if(crypto_numeric, is.numeric)), 2)
+ggcorrplot(corr, hc.order = T, ggtheme = ggplot2::theme_gray,
+   colors = c("red", "white", "blue"), lab = T)
+```
+OBSERVATION: There is a a negative correlation between daily internet usage, daily time spent on site and Area Income  vs clicked on ad.
+
+
+##Covariance between Daily Internet Usage and Area Income
+```{r}
+Daily.Internet.Usage <- crypto_ads$Daily.Internet.Usage 
+Area.Income <- crypto_ads$Area.Income 
+cov(Daily.Internet.Usage, Area.Income)
+```
+##Covariance between Daily Internet Usage and Age on the Site
+```{r}
+Daily.Internet.Usage <- crypto_ads$Daily.Internet.Usage
+Ages <- crypto_ads$Age
+cov(Daily.Internet.Usage, Ages)
+```
+
+##Covariance between age and area income on site 
+```{r}
+Area_Income <- crypto_ads$Area.Income 
+age <- crypto_ads$Age
+cov(Area.Income, age)
+```
+##Covariance between Daily Internet Usage and Area income
+```{r}
+Daily_Internet_Usage <- crypto_ads$Daily.Internet.Usage
+Area.Income <- crypto_ads$Area.Income 
+cov(Daily.Internet.Usage, Area.Income)
+```
+
+
+```{r}
+```
+# Daily Time spent on site and Age.
+```{r}
+library(ggplot2)
+# Barplot
+p<-ggplot(data=crypto_ads, aes(x=Age, y=Daily.Time.Spent.on.Site)) +
+  geom_bar(stat="identity")
+p + coord_flip()
+```
+
+
+```{r}
+colnames(crypto_ads)
+```
+
+
+
+###Daily time spent on site 
+
+```{r}
+library(ggplot2)
+# Barplot
+p<-ggplot(data=crypto_ads, aes(x=Clicked.on.Ad, y=Daily.Time.Spent.on.Site)) +
+  geom_bar(stat="identity")
+p + coord_flip()
+```
+
+Users are online but no advertisments clicked
+
+
+# Scatter plot to compare age vs daily time spent
+
+```{r}
+plot(crypto_ads$Age, crypto_ads$Daily.Time.Spent.on.Site, xlab="Age", ylab="Time Spent")
+```
+
+# Scatter plot to compare Clicked on Ad vs Time Spent
+```{r}
+
+plot(crypto_ads$Clicked.on.Ad, crypto_ads$Daily.Time.Spent.on.Site, xlab="Clicked on Ad", ylab="Time Spent")
+```
+
+
+
+# Implement the Solution by Using Decision Trees
+# Importing relevant libraries
+
+```{r}
+install.packages("rpart")
+install.packages("rpart.plot")
+install.packages("mlbench")
+install.packages("caret")
+```
+
+
+```{r}
+library(rpart)
+library(rpart.plot)
+library(mlbench)
+library(caret)
+```
+
+# Defining features and target variables
+
+```{r}
+model_data <- crypto_ads %>% select(1,2,3,4,7,8,10)
+head(model_data)
+```
+
+
+```{r}
+model_data$Country <- as.integer(as.factor(model_data$Country))
+```
+
+# Normalizing the features
+```{r}
+normalize <- function(x){
+  return ((x-min(x)) / (max(x)-min(x)))}
+
+model_data$Daily.Time.Spent.on.Site <- normalize(model_data$Daily.Time.Spent.on.Site )
+model_data$Age <- normalize(model_data$Age)
+model_data$Area.Income <- normalize(model_data$Area.Income)
+model_data$Daily.Internet.Usage <- normalize(model_data$Daily.Internet.Usage)
+model_data$Country <- normalize(model_data$Country)
+```
+
+# Creating the test and train sets
+
+```{r}
+data_train <- model_data[1:800, ]
+data_test <- model_data[801:1000,]
+```
+
+
+```{r}
+dim(data_train)
+dim(data_test)
+```
+
+# Fitting the Decision Tree Model
+
+```{r}
+install.packages('tree')
+library(tree)
+```
+
+
+```{r}
+model <- rpart(Clicked.on.Ad~., data = data_train, method = 'class')
+rpart.plot(model)
+```
+
+
+# Making a prediction on the test data
+
+```{r}
+#predict_unseen <-predict(fit, data_test, type = 'class')
+
+#table_mat <- table(data_test$Clicked.on.Ad, predict_unseen)
+#table_mat
+```
+
+
+```{r}
+# Calculating the accuracy score of the model
+
+#accuracy_score <- sum(diag(table_mat)) / sum(table_mat)
+
+#accuracy_score
+```
+
+#Hyperparameter Tuning
+```{r}
+# Adjusting the maximum depth as well as minimum  sample of a node
+
+accuracy_tune <- function(fit) {
+    predict_unseen <- predict(fit, data_test, type = 'class')
+    table_mat <- table(data_test$Clicked.on.Ad, predict_unseen)
+    accuracy_Test <- sum(diag(table_mat)) / sum(table_mat)
+    accuracy_Test
+}
+
+control <- rpart.control(minsplit = 4,
+    minbucket = round(5 / 3),
+    maxdepth = 3,
+    cp = 0)
+tune_fit <- rpart(Clicked.on.Ad~., data = data_train, method = 'class', control = control)
+accuracy_tune(tune_fit)
+```
+
+
+
+# Analysis
+1. Users are online but no advertisements clicked
+2. Most of the visitors to the site have an average income of 60,000
+3. Majority of the visitors to the website range between 25 and 40 years of age
+
